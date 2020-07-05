@@ -1,7 +1,9 @@
-Martin-Löf style Identity Type and Quotient Inductive-Inductive Types in Core Cedille
-=====================================================================================
+Intensional Identity Type and Quotient Inductive-Inductive Types in Core Cedille
+================================================================================
 
 In their article [1] Abel et al. note that Leibniz Equality is morally the impredicative “Church-”encoding for Martin-Löf Identity type of Intuitionistic Type Theories. Core Cedille[2, 3, 4] is a novel logically consistent typed lambda calculus (i.e. no first-class inductive types, everything is made of lambda terms) with a unique long sought-after property: W-types (basic inductive types available in Intuitionistic Type Theories, such as natural numbers, lists, trees, etc.) can be encoded within the calculus with correct recursion and induction principles. It is tempting to try to encode the identity type and ultimately the vast range of Quotient Inductive-Inductive Type Families (QIITs) including the type of Cauchy Reals and initial algebras for all finitary Generalised Algebraic Theories without equations on sorts.
+
+It is worth noting, that expressivity of Core Cedille comparable to Intensional Type Theories and even Predicative Calculus of Cumulative Inductive Constructions (pCuIC), the state-of-the art basis of the Coq proof assistant. In comparison to them, Core Cedille lacks universes and large elimination, but enjoys first-class support for large categories and similar properly large structures”. It is hoped for, it is possible to combine advantages of both worlds akin to ZMC/S set theory. 
 
 § Preliminaries: Notation and the Type System
 ---------------------------------------------
@@ -19,3 +21,4 @@ id := (0 \T : ﹡, \x : T) ↦ x
 of the type `∀\T : ﹡, T -> T`. Note that `id ⩦ (\x ↦ x)`.
 
 Note that `Nat -> ﹡` (sequence of types), `﹡ -> ﹡` (type parametrized by type) or even `(Nat -> ﹡) -> ﹡ -> ﹡` (type parametrized by a type and a sequence of types) are also valid types for parameters, but never for arguments.
+
