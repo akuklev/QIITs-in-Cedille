@@ -1,8 +1,10 @@
-Implementation of Martin-Löf style Equality Type and Quotient Inductive-Inductive Types in Cedille
-==================================================================================================
+Martin-Löf style Identity Type and Quotient Inductive-Inductive Types in Core Cedille
+=====================================================================================
 
-§ Preliminaries: Notation and Type System
------------------------------------------
+In their article [1] Abel et al. note that Leibniz Equality is morally the impredicative “Church-”encoding for Martin-Löf Identity type of Intuitionistic Type Theories. Core Cedille[2, 3, 4] is a novel logically consistent typed lambda calculus (i.e. no first-class inductive types, everything is made of lambda terms) with a unique long sought-after property: W-types (basic inductive types available in Intuitionistic Type Theories, such as natural numbers, lists, trees, etc.) can be encoded within the calculus with correct recursion and induction principles. It is tempting to try to encode the identity type and ultimately the vast range of Quotient Inductive-Inductive Type Families (QIITs) including the type of Cauchy Reals and initial algebras for all finitary Generalised Algebraic Theories without equations on sorts.
+
+§ Preliminaries: Notation and the Type System
+---------------------------------------------
 
 We'll work in a system where terms don't in general have a canonical type, but can be typechecked against a given type, possibly nonunique. We'll write bare (untyped) lambda terms like `\x ↦ expr(x)` and lambda terms with typed variables like `(\x : Nat) ↦ expr(x)`. If two lambda terms `f` and `g` are identical as bare terms (i.e. with eventual type annotations stripped), we'll write `f ⩦ g`. To give an example, `(\x : Nat) ↦ x` and `(\x : AnyOtherType) ↦ x` are identical as bare terms. For nested lambda terms like `(\n : Nat) ↦  (\m : Nat) ↦ (q : Int) ↦ ...` we'll sometimes use an equivalent shorter notation `(\n \m : Nat, \q : Int) ↦ ...`.
 
