@@ -99,5 +99,35 @@ Nat := (\n : Natᶜ, n : Natᴵ(n))
 ```
 Inhabitants of this types are Church numerals (“function iterators”) `\n` that simultaneously typecheck as induction proofs (“dependent function iterators”) for themselves. Fortunatelly, for each Church numeral `n` as written above we can write down an induction proof `n'` and it turns out `n ⩦ n'`, thus Church numerals inhabit the type `Nat`. Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle.
 
-§ Leibniz equality and Id-types
+§ Leibniz Equality and Id-types
 -------------------------------
+
+Leibniz Equality of two terms is defined as follows:
+```
+Eq[\T : ﹡](\x \y : T) := ∀\P : (T -> ﹡), P[x] -> P[y]
+```
+
+We can easily provide a term stating every `x` is equal to itself:
+```
+refl[\T : ﹡](\x : T) := (0 P : T -> ﹡, e : P[x]) ↦ e
+```
+
+The dependent eliminator for Id-types is known as J-rule:
+```
+J[\T : ﹡](\x : T)(\p : Eq[T](x, y)) := ∀\P : (Eq[T](x, t) -> ﹡), P(refl) -> P(p)
+```
+
+Now let's try to apply the approach we already employed for W-types:
+```
+Id[\T : ﹡](\x \y : T) := (\p : Eq[T](x, y), p : J[T](x, y)(p))
+```
+
+§ Impredicative Encoding for Int as Quotient Inductive Type
+-----------------------------------------------------------
+
+```
+Intᶜ := ∀\T : ﹡, (step : T -> T) -> (unstep : T -> T) ->
+ (e1 : ∀\x : T, Eq[T](x, step(unstep(x)))) ->
+ (e2 : ∀\x : T, Eq[T](x, unstep(step(x))))
+ -> T -> T
+```
