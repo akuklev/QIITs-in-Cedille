@@ -159,6 +159,7 @@ Now let's try to apply the approach we already employed for W-types to construct
 Id[\T : ﹡](\x \y : T) := (\p : Eq[T](x, y), p : J[T](x, y)(p))
 ```
 
+<!---
 § Impredicative Encoding for Int as Quotient Inductive Type
 -----------------------------------------------------------
 
@@ -168,3 +169,5 @@ Intᶜ := ∀\T : ﹡, (step : T -> T) -> (unstep : T -> T) ->
  (e2 : ∀\x : T, Eq[T](x, unstep(step(x))))
  -> T -> T
 ```
+
+--->
