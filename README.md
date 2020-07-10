@@ -152,12 +152,18 @@ For structured objects (amongst other things, geometric structures such as graph
 
 The type of identifications `p : Idᵀ(G, H)` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl[\T : ﹡](\x : T) : Idᵀ(G, H)` and the “induction principle” known as the J-rule:
 ```
-J[\T : ﹡](\x \y : T, p : Idᵀ(x, y)) := ∀\P : (\a \b : T -> Idᵀ(a, b) -> ﹡), ((t : T) -> P[t, t, refl]) -> P[x, y, p]
+J[\T : ﹡](\x \y : T, p : Idᵀ(x, y)) :=
+  ∀\P : (\a \b : T -> Idᵀ(a, b) -> ﹡),
+  ((\t : T) -> P[t, t, refl[T](t)]) -> P[x, y, p]
 ```
 
 Now let's try to apply the approach we already employed for W-types to construct the `Id`-type from `Eq` in Core Cedille:
 ```
-Id[\T : ﹡](\x \y : T) := (\p : Eq[T](x, y), p : ∀\P : (\a \b : T -> Eq[T](a, b) -> ﹡), ((\t : T) -> P[t, t, refl]) -> P[x, y, p])
+Id[\T : ﹡](\x \y : T) := (
+  \p : Eq[T](x, y),
+  p : ∀\P : (\a \b : T -> Eq[T](a, b) -> ﹡),
+    ((\t : T) -> P[t, t, refl[T](t)]) -> P[x, y, p]
+)
 ```
 
 {Here comes a coding experiment to define this type in Cedille and ensuring it satisfies induction principle for itself.}
