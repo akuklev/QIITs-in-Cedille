@@ -46,10 +46,11 @@ An annotated function checkable against this type will have an aditional paramet
 (0 \n : Nat) ↦ (l : FList[X, n]) ↦ ...
 ```
 or equivalently
-```(0 \n : Nat, l : FList[X, n]) ↦ ...
+```
+(0 \n : Nat, l : FList[X, n]) ↦ ...
 ```
 
-Zero before the variable means, it is allowed to be used in the body exactly zero times. (The notation suggests, that besides notation for arguments and parameters, there can also be a notation for resources `(1 \x : MutuallyExclusiveResource)`, variables that have to be used exactly once.) Parameters can be used to require some additional preconditions on arguments, and can be used to establish some postconditions on computed value.
+Zero before the variable means, it is allowed to be used in the body exactly zero times. (The notation is borrowed from the Idris 2 language: Besides arguments that can be used multiple times and parameters that are not allowed to be used in function body, Idris also supports resources `(1 \x : MutuallyExclusiveResource)`, variables that have to be used exactly once.) Parameters can be used to require some additional preconditions on arguments, and can be used to establish some postconditions on computed value.
 
 Parameters' types are allowed to contain a special symbol `﹡` standing for “any type”, which is disallowed for arguments. In particular, we have can define the function
 ```
