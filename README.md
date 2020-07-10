@@ -148,17 +148,19 @@ refl[\T : ﹡](\x : T) := (0 P : T -> ﹡, e : P[x]) ↦ e
 ```
 This property of equality is called reflexivity. Symmetry and transitivity for `Eq` can be also easily proved.
 
-For structured objects (amongst other things, geometric structures such as graphs, and algebraic structures, such as groups, rings, etc.) it makes sense to talk about identifiablity instead of equality. An identification `p : Idᵀ(G, H)` between two objects `G` and `H` (called isomorphism in case of algebraic structures) is a rule allowing to “transport” any construction `f(\x : G)` on `G` and any true statement `P[G]` about `G` into a construction on `H`/true statement `P[H]` about `H` and vice versa. By transporting true statements both ways, the notion of identifiability subsumes the notion of indiscernibility (“Leibniz equality”), but it extends it by acknowledging that there can be more than one way to identify things, and the choice of identification is substantial. Moreover identifications themselves are structured mathematical objects in their own right, in particular, they might be identifiable in more than one way, etc.
+For structured objects (amongst other things, geometric structures such as graphs, and algebraic structures, such as groups, rings, etc.) it makes sense to talk about identifiablity instead of equality. An identification `p : Idᵀ(G, H)` between two objects `G` and `H` (called isomorphism in case of algebraic structures) is a rule allowing to “transport” any construction `f(\x : G)` on `G` and any true statement `P[G]` about `G` into a construction on `H`/true statement `P[H]` about `H` and vice versa. By transporting true statements both ways, the notion of identifiability subsumes the notion of indiscernibility (“Leibniz equality”), but it extends it by acknowledging that there can be more than one way to identify things, and the choice of identification is substantial. (The recent insight, that identifications themselves are structured mathematical objects in their own right, and it makes a lot of sense to think about identifications between identifications, lead to a novel research area called Homotopy Type Theory.)
 
-The type of identifications `p : Idᵀ(G, H)` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining feature is the only constructor `refl[\T : ﹡](\x : T) : Idᵀ(G, H)` and an “induction principle” known as the J-rule:
+The type of identifications `p : Idᵀ(G, H)` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl[\T : ﹡](\x : T) : Idᵀ(G, H)` and the “induction principle” known as the J-rule:
 ```
-J[\T : ﹡](\x : T)(\p : Eq[T](x, y)) := ∀\P : (Eq[T](x, t) -> ﹡), P(refl) -> P(p)
+J[\T : ﹡](\x \y : T, p : Idᵀ(x, y)) := ∀\P : (\a \b : T -> Idᵀ(a, b) -> ﹡), ((t : T) -> P[t, t, refl]) -> P[x, y, p]
 ```
 
 Now let's try to apply the approach we already employed for W-types to construct the `Id`-type from `Eq` in Core Cedille:
 ```
-Id[\T : ﹡](\x \y : T) := (\p : Eq[T](x, y), p : J[T](x, y)(p))
+Id[\T : ﹡](\x \y : T) := (\p : Eq[T](x, y), p : ∀\P : (\a \b : T -> Eq[T](a, b) -> ﹡), ((\t : T) -> P[t, t, refl]) -> P[x, y, p])
 ```
+
+{Here comes a coding experiment to define this type in Cedille and ensuring it satisfies induction principle for itself.}
 
 <!---
 § Impredicative Encoding for Int as Quotient Inductive Type
