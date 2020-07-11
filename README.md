@@ -12,21 +12,26 @@ _______
 § Preliminaries: Notation and the Type System
 ---------------------------------------------
 
-We'll work in a system where terms don't in general have a canonical type, but can be typechecked against a given type, possibly nonunique. Types are generally written in title-case (e.g. `Nat` for natural numbers, `Int` for integer numbers) and can have parameters (e.g. `List[Nat]` for list of natural numbers or `FList[Int, 5]` for list of integer numers of length 5). We'll write bare (untyped) lambda terms like
+(Our rather unorthodox notation is inspired by Conor McBrides Quantitative Type Theories)
+
+We'll write bare, untyped lambda terms like this (but we'll actually never write them):
 ```
 \x ↦ expr(x)
 ```
 
-and lambda terms with typed variables like
+There are data types, like `Int` standing for “integer number” or `Nat` standing for “natural number”, they are used to write down annotated lambda terms like this:
 ```
 (\x : Nat) ↦ expr(x)
 ```
 
-If two lambda terms `f` and `g` are identical as bare terms (i.e. with eventual type annotations stripped), we'll write `f ⩦ g`. To give an example, `(\x : Nat) ↦ x` and `(\x : AnyOtherType) ↦ x` are identical as bare terms.
+The thing to the right of the colon has to be a datatype. Types are generally written in title-case (e.g. `Nat` for natural numbers, `Int` for integer numbers) and can have parameters (e.g. `List[Nat]` for list of natural numbers or `FList[Int, 5]` for list of integer numers of length 5). Not all types are datatypes: for example there is a type `﹡` of all datatypes. In type definitions, the thing to the right of the colon may by any type, non neccessarily a datatype. For example, the definition of `FList` begins as follows:
+```
+FList[\T : ﹡, length : Nat] := ...
+```
 
 For nested lambda terms like
 ```
-(\n : Nat) ↦  (\m : Nat) ↦ (q : Int) ↦ ...
+(\n : Nat) ↦ (\m : Nat) ↦ (q : Int) ↦ ...
 ```
 we'll sometimes use an equivalent shorter notation
 ```
@@ -34,50 +39,61 @@ we'll sometimes use an equivalent shorter notation
 ```
 (NB: Backslash before variable name should be seen as freshness sigil: it belongs to the variable name and is used exactly once with each variable: at the point where its name appears the first time. Freshness sigils are mainly useful in languages with pattern matching, where patterns can contain both placeholders (labeled by fresh variable names) for reading values out and interpopations (labeled by names of constants or variables already in scope) for filling the values in.)
 
-A typed lambda term can be checked against it type: if for a term `f := (\x : X) ↦ expr(x)` the term `expr(x)` typechecks against type `Y`, the term `f` typechecks against `X -> Y`. Such types are called function types. In general, the type `Y` can be dependent on the variable `x`: consider a function `f(n : Nat)`, generating some list of integers of length `n`, say first `n` Fibonacci numbers, than each `f(n)` whould typecheck against `FList[Int, n]`, in this case can write the type of `f` as
+We'll work in a system where terms don't in general have a canonical type, but can be typechecked against a given type, possibly nonunique. In particular, if for a term `f := (\x : X) ↦ expr(x)` the term `expr(x)` typechecks against type `Y` for every `x : X`, the term `f` typechecks against `X -> Y`. Such types are called function types. In general, the type `Y` can be dependent on the variable `x`: consider a function `f(n : Nat)`, generating some list of integers of length `n`, say first `n` Fibonacci numbers, than each `f(n)` whould typecheck against `FList[Int, n]`, in this case can write the type of `f` as
 ```
-(\n : Nat) -> FList[Int, n]
+∀\n : Nat, FList[Int, n]
 ```
-Such types are called dependent function types. Note the notational difference between lambda terms and dependent function types: `↦` vs `->`.
+In words: “(`f` is) for each natural number `n`, a list of integers of length `n`”. Such types are called dependent function types. The notation `X -> Y` is a shorthand for `∀\x : X, Y` for the case `Y` does not depend on `x`.
+
+---
+
+Sometimes, in order to write down type annotation for a function we need parameters (which are not used in the body of function).
+
+
+If two lambda terms `f` and `g` are identical as bare terms (i.e. with type annotations stripped), we'll write `f ⩦ g`. To give an example, `(\x : Nat) ↦ x` and `(\x : AnyOtherType) ↦ x` are identical as bare terms.
 
 Now consider the case you have a function on lists that preserves list length, and you want to express this property in its type. For this, you need a new kind of type, it will be written
 ```
-∀\n : Nat, FList[X, n] -> FList[Y, n]
+∀\n :⁰ Nat, FList[X, n] -> FList[Y, n]
 ```
-An annotated function checkable against this type will have an aditional parameter `\n : Nat` to provide the type annotation for its argument. The parameter is very much like argument, but it can be used only in type annotations, not in the body of the function, for this reason we'll introduce the following notation:
+An annotated function checkable against this type will have an aditional parameter `\n :⁰ Nat` to provide the type annotation for its argument. The parameter is very much like argument, but it can be used only in type annotations, not in the body of the function. For the function itself, we'll use the following notation:
 ```
-(0 \n : Nat) ↦ (l : FList[X, n]) ↦ ...
+(\n :⁰ Nat) ↦ (l : FList[X, n]) ↦ ...
 ```
 or equivalently
 ```
-(0 \n : Nat, l : FList[X, n]) ↦ ...
+(\n :⁰ Nat, l : FList[X, n]) ↦ ...
 ```
 
-Zero before the variable means, it is allowed to be used in the body exactly zero times. (The notation is borrowed from the Idris 2 language: Besides arguments that can be used multiple times and parameters that are not allowed to be used in function body, Idris also supports resources `(1 \x : MutuallyExclusiveResource)`, variables that have to be used exactly once.) Parameters can be used to require some additional preconditions on arguments, and can be used to establish some postconditions on computed value.
+Zero superscript means, the variable is allowed to be used in the body exactly zero times. One could also say, the function function depends on `n` uniformly, i.e. computes without inspecting `n`.
+
+(The notation is inspired by Quantitative Type Theories: Besides arguments that can be used multiple times and parameters that are not allowed to be used in function body, most Quantitative Type Theories also support resources `(\x :¹ MutuallyExclusiveResource)`, variables that have to be used exactly once.) Parameters can be used to require some additional preconditions on arguments, and can be used to establish some postconditions on computed value.
 
 Parameters' types are allowed to contain a special symbol `﹡` standing for “any type”, which is disallowed for arguments. In particular, we have can define the function
 ```
-id := (0 \T : ﹡, \x : T) ↦ x
+id := (\T :⁰ ﹡, \x : T) ↦ x
 ```
 of the type 
 ```
-∀\T : ﹡, T -> T
+∀\T :⁰ ﹡, T -> T
 ```
-Note that `id ⩦ (\x ↦ x)`.
+Note that `id ⩦ (\x ↦ x)`. In general, on the level of bare terms `∀\x : X, Y[x]` is a type of functions on `X`, but the type `∀\x :⁰ X, Y[x]` is an (in general infinitary) intersection type: it is the type of terms which simultaneously typecheck against all `Y[x]` for every `x : X`.
 
 Note that `Nat -> ﹡` (sequence of types), `﹡ -> ﹡` (type parametrized by type) or even `(Nat -> ﹡) -> ﹡ -> ﹡` (type parametrized by a type and a sequence of types) are also valid types for parameters, but never for arguments.
 
 Both lambda expressions and types can be applied to arguments (written by juxtaposition `f x` or with parentheses `f(x)`) and parameters (written like `id[Nat]`, `List[Nat]` or `FList[Int, n]`)
+
+ The notion of bare identity is the only use of bare terms in the system:
 
 § Encoding Nat in Core Cedille
 ------------------------------
 
 Church numerals are terms of the following form:
 ```
-zero := (0 \T : ﹡, step : T -> T, base : T) ↦ base
-once := (0 \T : ﹡, step : T -> T, base : T) ↦ step(base)
-twice := (0 \T : ﹡, step : T -> T, base : T) ↦ step(step(base))
-thrice := (0 \T : ﹡, step : T -> T, base : T) ↦ step(step(step(base)))
+zero := (\T :⁰ ﹡, step : T -> T, base : T) ↦ base
+once := (\T :⁰ ﹡, step : T -> T, base : T) ↦ step(base)
+twice := (\T :⁰ ﹡, step : T -> T, base : T) ↦ step(step(base))
+thrice := (\T :⁰ ﹡, step : T -> T, base : T) ↦ step(step(step(base)))
 ```
 
 If a number `n` is given in form of a Church numeral, any function can be iterated `n` times simply by applying `n` to that function:
@@ -87,23 +103,23 @@ If a number `n` is given in form of a Church numeral, any function can be iterat
 
 Church numerals could be called “function iterators”. We can easily write down the type of Church numerals
 ```
-Natᶜ := ∀\T : ﹡, (T -> T) -> T -> T
+Natᶜ := ∀\T :⁰ ﹡, (T -> T) -> T -> T
 ```
 and the successor function
 ```
-succ(\n : Natᶜ) := (0 \T : ﹡, step : T -> T, base : T) ↦ (n[T] step)(step(base))
+succ(\n : Natᶜ) := (\T :⁰ ﹡, step : T -> T, base : T) ↦ (n[T] step)(step(base))
 ```
 
 Church numerals can only iterate functions returning values of the same type as their arguments, i.e. functions `f` of the type `∀\T : ﹡, (T -> T)`. Can we possibly iterate a function of a more general type? Yes, theoretically type `T` could be indexed over some type `I`, and its index could change every time we apply the function `f`. Let's call the index updating function `g` and write down signatures of `f` and `f'`:
 ```
 g : I -> I
 T : I -> ﹡
-f : ∀\i : I, T[i] -> T[g i]
+f : ∀\i :⁰ I, T[i] -> T[g i]
 ```
 
 It would be desirable if we could iterate such functions as well: for each Church numeral (“iterator”) `n` we want to have a “dependent iterator” `n'` acting on such `f`s in so that
 ```
-(n' f) : ∀\i : I, T[i] -> T[(n g) i]
+(n' f) : ∀\i :⁰ I, T[i] -> T[(n g) i]
 ```
 
 Unfortunately, it cannot work exactly this way, because there is no `g` on the left side here (it is not encoded into `f` and there is no way for universal generalized iterator `n'` to guess it), so we have to fine-tune the setup. For the purpose of iterating `f` we're not interested in all values of index `i : I`, but only values obtained by iterated application of `g` to the base value (the index `i : I` of the type `T[i]` where the argument `x : T[i]` of `f(x)` and `(n' f)(x)` lives), so we can retype `f`: let `T'[zero] := T[i]` be the type where the argument lives and `T'[n] := (n g) i`, then
@@ -116,12 +132,12 @@ And now we can write
 ```
 Now how does the type of dependent iterator `n' : Natᴵ(n)` (it obviously depends on `n` itself) look like?
 
-Under propositions-as-types interpretation of types `Natᴵ(n)` is precisely the statement we can perform mathematical induction (Nat-induction) up to `n`: given a predicate `T : Nat -> ﹡`, an induction step `step : T[n] -> T[succ n]` and the base case `base : T[zero]`, we obtain `T[n]` for arbitrary `n : Nat`:
+Under propositions-as-types interpretation of types `Natᴵ(n)` is precisely the statement we can perform mathematical induction (Nat-induction) up to `n`: given a predicate `T :⁰ Nat -> ﹡`, an induction step `step : T[n] -> T[succ n]` and the base case `base : T[zero]`, we obtain `T[n]` for arbitrary `n : Nat`:
 ```
-Natᴵ(\n : Natᶜ) := ∀\T : (Natᶜ -> ﹡), (step: ∀\m : Natᶜ, T[m] -> T[succ m]) -> (base : T[zero]) -> T[n]
+Natᴵ[\n : Natᶜ] := ∀\T :⁰ (Natᶜ -> ﹡), ∀\step: ∀\m : Natᶜ, T[m] -> T[succ m]), ∀\base : T[zero]), T[n]
 ```
 
-It turns out, we can actually easily provide typed lambda terms `zero' : Natᴵ(zero)`, `once' : Natᴵ(once)`, etc. Moreover they coincide with respective Church numerals as bare terms: `n ⩦ n'`.
+It turns out, we can actually easily provide typed lambda terms `zero' : Natᴵ[zero]`, `once' : Natᴵ[once]`, etc. Moreover they coincide with respective Church numerals as bare terms: `n ⩦ n'`.
 
 The crucial feature of Core Cedille is the dependent intersection type (first introduced by A. Kopylov) that allows to define the type
 ```
