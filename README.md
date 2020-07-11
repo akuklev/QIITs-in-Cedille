@@ -1,5 +1,5 @@
-Core Cedille subsumes a Homotopy Type Theory without Universes
-==============================================================
+Core Cedille has Id-Types and HIITs
+===================================
 
 In their article [1] Abel et al. note that Leibniz Equality is morally the impredicative “Church-”encoding for Martin-Löf Identity type of Intuitionistic Type Theories. Core Cedille[2, 3, 4] is a novel logically consistent typed lambda calculus (i.e. no first-class inductive types, everything is made of lambda terms): with an extraordinary and long sought-after property: W-types (basic inductive types available in Intuitionistic Type Theories, such as natural numbers, lists, trees, etc.) and dependently-typed pairs can be encoded within the calculus with correct recursion and induction principles. Since the calculus also readily includes dependently-typed functions, it is fair to say that Core Cecille is known to subsume basic Intuitionistic Type Theory except for universes and identity types.
 
