@@ -1,12 +1,13 @@
 Core Cedille subsumes a Homotopy Type Theory without Universes
 ==============================================================
 
-In their article [1] Abel et al. note that Leibniz Equality is morally the impredicative “Church-”encoding for Martin-Löf Identity type of Intuitionistic Type Theories. Core Cedille[2, 3, 4] is a novel logically consistent typed lambda calculus (i.e. no first-class inductive types, everything is made of lambda terms) with a unique long sought-after property: W-types (basic inductive types available in Intuitionistic Type Theories, such as natural numbers, lists, trees, etc.) can be encoded within the calculus with correct recursion and induction principles. Since it readily has dependently-typed functions and trivially supports dependently-typed pairs, it is fair to say that Core Cecille is known to subsume basic Intuitionistic Type Theory except for universes and identity types. In present work we show how to encode the identity type, and ultimately the vast range of Higher Inductive-Inductive Type Families (HIITs) including the type of Cauchy Reals and initial algebras for all finitary Generalised Algebraic Theories without equations on sorts.
+In their article [1] Abel et al. note that Leibniz Equality is morally the impredicative “Church-”encoding for Martin-Löf Identity type of Intuitionistic Type Theories. Core Cedille[2, 3, 4] is a novel logically consistent typed lambda calculus (i.e. no first-class inductive types, everything is made of lambda terms): with an extraordinary and long sought-after property: W-types (basic inductive types available in Intuitionistic Type Theories, such as natural numbers, lists, trees, etc.) and dependently-typed pairs can be encoded within the calculus with correct recursion and induction principles. Since the calculus also readily includes dependently-typed functions, it is fair to say that Core Cecille is known to subsume basic Intuitionistic Type Theory except for universes and identity types.
 
-Thus, Core Cedille subsumes a version of Homotopy Type Theory lacking only universes and large elimination. In turn, as opposed to Intuitionistic Type Theories where one can only talk about `U`-small categories for a given universe `U`, the language of Core Cedille allows to talk about categories and similar structures without size restrictions. It is hoped for, that it is possible to combine advantages of both worlds in a manner akin to ZMC/S set theory: namely by a strong reflection property ensuring there is a univalent universe* `U`, so that any definable type can be relativised into it, and construction internal to `U` but not explicitly using it can be generalised out of it, e.g. any proof in the category of `U`-small groups, that doesn't use smallness explicitly, automatically generalises to construction or proof about groups without any size restrictions, see https://golem.ph.utexas.edu/category/2009/11/feferman_set_theory.html.
+In present work we show how to encode the identity type, and ultimately the vast range of Higher Inductive-Inductive Type Families (HIITs) including the type of Cauchy Reals and initial algebras for all finitary Generalised Algebraic Theories without equations on sorts. Thus, Core Cedille subsumes a version of Homotopy Type Theory lacking only universes and large elimination, but supporting first class complex-kinded polymorphism instead*. 
 
 _______
-* Applying the reflection principle to itself yields a hierarchy of universes unbounded both upwards and downwards.
+* As opposed to Intuitionistic Type Theories where one can only talk about `U`-small categories for a given universe `U`, the language of Core Cedille allows to talk about categories and other structures without size restrictions. We hope that it is possible to combine advantages of both worlds in a manner akin to ZMC/S set theory: namely by a strong reflection property ensuring there is a univalent universe `U`, so that any definable type can be relativised into it, and construction internal to `U` but not explicitly using it can be generalised out of it, e.g. any proof in the category of `U`-small groups, that doesn't use smallness explicitly, should automatically generalise a proof about groups without any size restrictions. Applying the reflection principle to itself yields a hierarchy of universes unbounded both upwards and downwards. For an extensive discussion of ZMC/S as a particularly pleasing foundation for category theory see https://golem.ph.utexas.edu/category/2009/11/feferman_set_theory.html.
+
 
 § Preliminaries: Notation and the Type System
 ---------------------------------------------
@@ -139,32 +140,32 @@ Similar construction can be carried out for any W-type[3] yielding an impredicat
 § Leibniz Equality and Id-types
 -------------------------------
 
-Leibniz Equality is the principle that two things `\x \y : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type:  
+Leibniz Equality is the principle that two things `\x \y : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type (lhs and rhs stand for “left-hand side” and “right-hand” side respectively):  
 ```
-Eq[\T : ﹡](\x \y : T) := ∀\P : (T -> ﹡), P[x] -> P[y]
+Eq[\T : ﹡, \lhs \rhs : T] := ∀\P : (T -> ﹡), P[lhs] -> P[rhs]
 ```
 
 We can easily provide a term stating every `x` is equal to itself:
 ```
-refl[\T : ﹡](\x : T) := (0 P : T -> ﹡, e : P[x]) ↦ e
+refl(0 \T : ﹡, \x : T) := (0 P : T -> ﹡, e : P[x]) ↦ e
 ```
 This property of equality is called reflexivity. Symmetry and transitivity for `Eq` can be also easily proved.
 
-For structured objects (amongst other things, geometric structures such as graphs, and algebraic structures, such as groups, rings, etc.) it makes sense to talk about identifiablity instead of equality. An identification `p : Idᵀ(G, H)` between two objects `G` and `H` (called isomorphism in case of algebraic structures) is a rule allowing to “transport” any construction `f(\x : G)` on `G` and any true statement `P[G]` about `G` into a construction on `H`/true statement `P[H]` about `H` and vice versa. By transporting true statements both ways, the notion of identifiability subsumes the notion of indiscernibility (“Leibniz equality”), but it extends it by acknowledging that there can be more than one way to identify things, and the choice of identification is substantial. (The recent insight, that identifications themselves are structured mathematical objects in their own right, and it makes a lot of sense to think about identifications between identifications, lead to a novel research area called Homotopy Type Theory.)
+For structured objects (amongst other things, geometric structures such as graphs, and algebraic structures, such as groups, rings, etc.) it makes sense to talk about identifiablity instead of equality. An identification `p : Id[T][G, H]` between two objects `G` and `H` of type `T` (called isomorphism in case of algebraic structures) is a rule allowing to “transport” any construction `f(\x : G)` on `G` and any true statement `P[G]` about `G` into a construction on `H`/true statement `P[H]` about `H` and vice versa. By transporting true statements both ways, the notion of identifiability subsumes the notion of indiscernibility (“Leibniz equality”), but it extends it by acknowledging that there can be more than one way to identify things, and the choice of identification is substantial. (The recent insight, that identifications themselves are structured mathematical objects in their own right, and it makes a lot of sense to think about identifications between identifications, lead to a novel research area called Homotopy Type Theory.)
 
-The type of identifications `p : Idᵀ(G, H)` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl[\T : ﹡](\x : T) : Idᵀ(G, H)` and the “induction principle” known as the J-rule:
+The type of identifications `p : Id[T][G, H]` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl(T, x) : Id[T][x, x]` and the “induction principle” known as the J-rule:
 ```
-J[\T : ﹡](\x \y : T, p : Idᵀ(x, y)) :=
-  ∀\P : (\a \b : T -> Idᵀ(a, b) -> ﹡),
-  ((\t : T) -> P[t, t, refl[T](t)]) -> P[x, y, p]
+J(0 \T : ﹡, \x \y : T, p : Id[T][x, y]) :=
+  ∀\P : (\a \b : T -> Id[T][a, b] -> ﹡),
+  ((\t : T) -> P[t, t, refl(T, t)]) -> P[x, y, p]
 ```
 
 Now let's try to apply the approach we already employed for W-types to construct the `Id`-type from `Eq` in Core Cedille:
 ```
-Id[\T : ﹡](\x \y : T) := (
-  \p : Eq[T](x, y),
-  p : ∀\P : (\a \b : T -> Eq[T](a, b) -> ﹡),
-    ((\t : T) -> P[t, t, refl[T](t)]) -> P[x, y, p]
+Id[\T : ﹡, \x \y : T] := (
+  \p : Eq[T][x, y],
+  p : ∀\P : (\a \b : T -> Eq[T][a, b] -> ﹡),
+    ((\t : T) -> P[t, t, refl(T, t)]) -> P[x, y, p]
 )
 ```
 
@@ -180,5 +181,20 @@ Intᶜ := ∀\T : ﹡, (step : T -> T) -> (unstep : T -> T) ->
  (e2 : ∀\x : T, Eq[T](x, unstep(step(x))))
  -> T -> T
 ```
+
+
+§ Digression: Incompletely Instantiated Types
+---------------------------------------------
+
+As we have already seen, types can have parameters in Core Cedille, e.g. `List[T]` or `FList[T, n]`. In order to declutter code, one can introduce the following syntactic sugar, seemingly allowing incompletely instantiated types. We'll let to use the name of parametrised type without parameters on the right side of `:` in argument lists (in particular in lambda term definitions), which desugars by adding omitted parameters to the argument list left to the argument of incompletely instantiated type:
+```
+(l : FList) ↦ ...    ===    (0 l⍝T : ﹡, 0 l⍝length : Nat, l : FList[l⍝T, l⍝length]) ↦ ...
+```
+
+The names of the invisible parameters are generated by concatenating the name of the argument, special connecting symbol (we found nothing better than `⍝` yet) and the name of the omitted parameter. For partial instantiation, the following syntax is proposed:
+```
+(n : Nat, l : FList[length ↦ n]) ↦ ...    ===   (n : Nat, 0 l⍝T : ﹡, l : FList[l⍝T, n]) ↦ ...
+```
+
 
 --->
