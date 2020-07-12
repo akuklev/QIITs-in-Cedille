@@ -69,7 +69,7 @@ Using a parameter of type `Nat` (which is an ordinary datatype), we can write do
 
 Owing to Propositions-as-Types, parameters can be also used to put conditions on function arguments:
 ```
-(\n \m : Nat, p :⁰ IsGreater[n, m]) ↦
+(\n \m : Nat, \p :⁰ IsGreater[n, m]) ↦
 ```
 
 Zero superscript means, the variable is allowed to be used in the body exactly zero times. The notation is inspired by Quantitative Type Theories: Besides arguments that can be used multiple times and parameters that are not allowed to be used in function body, most Quantitative Type Theories also support resources `(\x :¹ MutuallyExclusiveResource)`, variables that have to be used exactly once.
@@ -83,15 +83,18 @@ Now let's clarify which types are datatypes:
 
 Since it is not allowed to write `X -> Y` if `Y` is not a datatype, we'll use `X -> Y` for `∀\x :⁰ X, Y` in such cases. It causes no problems, since it makes no sense write `∀\x :⁰ X, Y` for datatypes `Y` independent of `x` (such type is simply equivalent to `Y`) as mentioned earlier. That being said, let's give a few examples: `Nat -> ﹡` (sequence of types), `﹡ -> ﹡` (type parametrized by type) or even `(Nat -> ﹡) -> ﹡ -> ﹡` (type parametrized by a type and a sequence of types) are all valid types, but none of them is a datatype.
 
+Now it's time to talk how to define datatypes and predicates on them.
+
+
 § Encoding Nat in Core Cedille
 ------------------------------
 
 Church numerals are terms of the following form:
 ```
-zero := (\T :⁰ ﹡, step : T -> T, base : T) ↦ base
-once := (\T :⁰ ﹡, step : T -> T, base : T) ↦ step(base)
-twice := (\T :⁰ ﹡, step : T -> T, base : T) ↦ step(step(base))
-thrice := (\T :⁰ ﹡, step : T -> T, base : T) ↦ step(step(step(base)))
+zero := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ base
+once := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ step(base)
+twice := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ step(step(base))
+thrice := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ step(step(step(base)))
 ```
 
 If a number `n` is given in form of a Church numeral, any function can be iterated `n` times simply by applying `n` to that function:
@@ -105,10 +108,10 @@ Natᶜ := ∀\T :⁰ ﹡, (T -> T) -> T -> T
 ```
 and the successor function
 ```
-succ(\n : Natᶜ) := (\T :⁰ ﹡, step : T -> T, base : T) ↦ (n[T] step)(step(base))
+succ(\n : Natᶜ) := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ (n[T] step)(step(base))
 ```
 
-Church numerals can only iterate functions returning values of the same type as their arguments, i.e. functions `f` of the type `∀\T : ﹡, (T -> T)`. Can we possibly iterate a function of a more general type? Yes, theoretically type `T` could be indexed over some type `I`, and its index could change every time we apply the function `f`. Let's call the index updating function `g` and write down signatures of `f` and `f'`:
+Church numerals can only iterate functions returning values of the same type as their arguments, i.e. functions `f` of the type `∀\T :⁰ ﹡, (T -> T)`. Can we possibly iterate a function of a more general type? Yes, theoretically type `T` could be indexed over some type `I`, and its index could change every time we apply the function `f`. Let's call the index updating function `g` and write down signatures of `f` and `f'`:
 ```
 g : I -> I
 T : I -> ﹡
@@ -122,7 +125,7 @@ It would be desirable if we could iterate such functions as well: for each Churc
 
 Unfortunately, it cannot work exactly this way, because there is no `g` on the left side here (it is not encoded into `f` and there is no way for universal generalized iterator `n'` to guess it), so we have to fine-tune the setup. For the purpose of iterating `f` we're not interested in all values of index `i : I`, but only values obtained by iterated application of `g` to the base value (the index `i : I` of the type `T[i]` where the argument `x : T[i]` of `f(x)` and `(n' f)(x)` lives), so we can retype `f`: let `T'[zero] := T[i]` be the type where the argument lives and `T'[n] := (n g) i`, then
 ```
-f' : ∀\n : Nat, T[n] -> T[succ n]
+f' : ∀\n :⁰ Nat, T[n] -> T[succ n]
 ```
 And now we can write
 ```
@@ -132,7 +135,7 @@ Now how does the type of dependent iterator `n' : Natᴵ(n)` (it obviously depen
 
 Under propositions-as-types interpretation of types `Natᴵ(n)` is precisely the statement we can perform mathematical induction (Nat-induction) up to `n`: given a predicate `T :⁰ Nat -> ﹡`, an induction step `step : T[n] -> T[succ n]` and the base case `base : T[zero]`, we obtain `T[n]` for arbitrary `n : Nat`:
 ```
-Natᴵ[\n : Natᶜ] := ∀\T :⁰ (Natᶜ -> ﹡), ∀\step: ∀\m : Natᶜ, T[m] -> T[succ m]), ∀\base : T[zero]), T[n]
+Natᴵ[\n : Natᶜ] := ∀\T :⁰ Natᶜ -> ﹡, ∀\step : (∀\m : Natᶜ, T[m] -> T[succ m]), ∀\base : T[zero], T[n]
 ```
 
 It turns out, we can actually easily provide typed lambda terms `zero' : Natᴵ[zero]`, `once' : Natᴵ[once]`, etc. Moreover they coincide with respective Church numerals as bare terms: `n ⩦ n'`.
@@ -148,7 +151,7 @@ n : ∀\T : (Natᶜ -> ﹡), (step: ∀\m : Natᶜ, T[m] -> T[succ m]) -> (base 
 
 Thus, `Nat` turns out to be the completely faithful representation of the W-type of natural numbers: it satisfies `Nat-`induction in the strong computational sense. Note that the type `Natᶜ` is not yet that good: It is well known that in Calculus of Constructions (essentially, Core Cedille without dependent intersection types) one cannot derive the induction principle for the type `Natᶜ`, moreover there are reasonable models of Calculus of Constructions where the type `Natᶜ` contains a kind of fixpoint operators on some `T -> T` functions in addition to Church encodings of natural numbers. The dependent intersection rules out these “non-standard” (or rather “not-in-general-computable”) iterators.
 
-Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle.
+Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle. Thus, in addition to natural numbers we also have lists, trees of various shapes, finite types of any size `n : Nat` including empty and unit types, disjoint sums `A + B` and tuples `A × B` for any datatypes `A` and `B` as well as dependent tuples `𝚺\x : X, Y[X]`. Since the characteristic predicate `P[\x : X]` for any recursively enumerable subset of a W-type `X` is a W-type itself, we also have enough predicates. As it was already shown, dependent function types (universal quantifier) can be used to turn predicates into propositions. {Tell about implication, conjunction, disjunction, negation and existential quantification, concluding we have the full first order intuitionistic logic at our disposal.}
 
 
 § Leibniz Equality and Id-types
@@ -184,6 +187,45 @@ Id[\T : ﹡, \x \y : T] := (
 ```
 
 {Here comes a coding experiment to define this type in Cedille and ensuring it satisfies induction principle for itself.}
+
+{Show we can encode `Monoid[T]`, `Category[Ob]` and `Functor[Ob1, c1 : Cat[Ob2], c2 : Cat[Ob2]]` now}
+
+§ Adding Universe(s)
+--------------------
+
+{EXPERIMENTAL}
+
+Using type formers that were already mentioned and type formers for ordinary datatypes, we can define datatypes like “Group structure on type `T`”, “Category structure on type `Ob`”, “Endofunctor parametrized type `T : ﹡ -> ﹡`”, “Functor structure on types `A` and `B`, each supplied by a category structure” or even “Spectrum structure on a sequence of types `Nat -> ﹡`”. But there is no datatype for a group, category, etc., itself: we cannot put these objects inside other objects, there is no `List[Cat]` of categories (while `List[Cat[Ob]]` of categories on a given carrier type is completely OK), there is no category of all groups `Cat[Grp]`, etc. What we need is a notion of a universe `U`, so that for parametrized datatypes can be relativized `U`, so that we have datatypes of `U`-small categories (that we can put into a list) and a category of `U`-small groups, and we need a reflection principle that allows to dismiss smallness, if it was not explicitly used.
+
+Postulate we have a universe `U` of datatype codes, together with type former `Dec(\code : U) : ﹡` (it's not a normal type former because it's not parametric in `code`). If a type former (like `Cat[Ob : ﹡]` factorizes via `U` and `Dec`), than we can produce a datatype `Cat^U : ﹡`, so that functions of the
+type `∀(\Ob :⁰ ﹡, c : Cat[Ob]), Y` can be applied to `c : Cat^U`.
+
+Problem: Not all definable datatypes `T : ﹡` live in the universe `U`, but only W-types and dependent products of those. Intersection types, in particular data types of the form `∀\x :⁰ X, Y` don't in general belong there, because they're not closed.
+
+Yet we can fake it by changing `∀\x :⁰ X, Y` to `∀\x : X^U, Y`, where `_^U` is the following translation:
+* if `T` is a datatype, just `T`;
+* if `T` is `﹡`, than `U`;
+* if `T` is 
+
+
+for a type code `T` let `T↬U` the following:
+— if it is `﹡`, than `U`.
+– if it is `∀\x :⁰ X, Y`
+
+Assume we have types TypeCode and DatatypeCode. For every closed type/datatype definition as presented above we can find an element of TypeCode/DatatypeCode. Parametric type definitions are lambda terms 
+
+---
+
+The reflection principle of ZMC/S applies to type constructors `𝜑` with U-small parameters. It defines the type constructor `𝜑ᵁ`, which is a version of `𝜑` where all quantifiers are constrained to run over `U`-small stuff. And it says that for each `p(params) : 𝜑(params)` we have a `p'(params) : 𝜑ᵁ(params)` and vice versa.
+
+You can consider a statement `𝜑 := ∃u : ﹡, Universe(U)`. It is true because `observe(U)`. Now `𝜑ᵁ := ∃u : U, IsUniverse(Dec(U))`, U has to contain a code for a smaller universe.
+
+Consider a statement `𝜑(x : U) := ∃u : ﹡, s : Universe(u), x : Dec`
+
+```
+
+```
+
 
 <!---
 § Impredicative Encoding for Int as Quotient Inductive Type
