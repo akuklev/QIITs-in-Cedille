@@ -86,8 +86,8 @@ Since it is not allowed to write `X -> Y` if `Y` is not a datatype, we'll use `X
 Now it's time to talk how to define datatypes and predicates on them.
 
 
-§ Encoding Nat in Core Cedille
-------------------------------
+§§ Encoding Nat in Core Cedille
+-------------------------------
 
 Church numerals are terms of the following form:
 ```
@@ -151,7 +151,20 @@ n : ∀\T : (Natᶜ -> ﹡), (step: ∀\m : Natᶜ, T[m] -> T[succ m]) -> (base 
 
 Thus, `Nat` turns out to be the completely faithful representation of the W-type of natural numbers: it satisfies `Nat-`induction in the strong computational sense. Note that the type `Natᶜ` is not yet that good: It is well known that in Calculus of Constructions (essentially, Core Cedille without dependent intersection types) one cannot derive the induction principle for the type `Natᶜ`, moreover there are reasonable models of Calculus of Constructions where the type `Natᶜ` contains a kind of fixpoint operators on some `T -> T` functions in addition to Church encodings of natural numbers. The dependent intersection rules out these “non-standard” (or rather “not-in-general-computable”) iterators.
 
-Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle. Thus, in addition to natural numbers we also have lists, trees of various shapes, finite types of any size `n : Nat` including empty and unit types, disjoint sums `A + B` and tuples `A × B` for any datatypes `A` and `B` as well as dependent tuples `𝚺\x : X, Y[X]`. Since the characteristic predicate `P[\x : X]` for any recursively enumerable subset of a W-type `X` is a W-type itself, we also have enough predicates. As it was already shown, dependent function types (universal quantifier) can be used to turn predicates into propositions. {Tell about implication, conjunction, disjunction, negation and existential quantification, concluding we have the full first order intuitionistic logic at our disposal.}
+Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle. Thus, in addition to natural numbers we also have lists, trees of various shapes, finite types of any size `n : Nat` including empty and unit types, disjoint sums `A + B` and tuples `A × B` for any datatypes `A` and `B` as well as dependent tuples `𝚺\x : X, Y[X]`.
+
+§§ Predicates, Subsets and Extrinsic Proofs
+-------------------------------------------
+
+For finite types `F`, we can obviously provide characteristic predicates `P[\x : F]` for any of their subsets. It is well known (we'll show that in Appendix I) that the characteristic predicate `P[\n : Nat]` for any recursively enumerable (= algebraic) subset of natural numbers can be given as a W-type. We also can encode logical connectives on predicates `P[\n : Nat]` and `S[\n : Nat]` as follows:
+```
+P∧S[\n : Nat] = P[n] × S[N]
+P∨S[\n : Nat] = P[n] + S[N]
+P→S[\n : Nat] = P[n] -> S[N]
+¬P[\n : Nat] = P[n] -> ⊥
+(where ⊥ is the empty type)
+```
+and we also have the universal quantifier `∀\n : Nat, P[n]` and a constructive version of existential quantifier `𝚺\n : Nat, P[n]`. It means, we can construct the whole arithmetic hierarchy of predicates on natural numbers. The same obviously applies to all enumerable datatypes (i.e. datatypes which can be bijectively mapped to natural numbers, such as `List[Nat]`, `BinTree[Nat] × List[VarTree[Nat]]`). There are datatypes which cannot be shown enumerable, for example `Nat -> Nat` (types of the kind `A -> B` where both `A` and `B` are infinite enumerable types are called Baire types) or `Nat -> Bool` (types of the kind `A -> B` where both `A` is an infinite enumerable type and `B` a finite type with at least two distinct inhabitants are called Cantor types). Later we will also see that we can define the type of real numbers which also cannot be shown to be enumerable. All are naturally effective Polish spaces, a kind of spaces for which arithmetic hierarchy pf predicates can be defined as well, and those predicates are indeed definable in our system. All in all, our system is indeed expressive enough to express enough predicates.
 
 
 § Leibniz Equality and Id-types
