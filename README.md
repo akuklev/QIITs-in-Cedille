@@ -167,14 +167,14 @@ Similar construction can be carried out for any W-type[3] yielding an impredicat
 § Leibniz Equality and Id-types
 -------------------------------
 
-Leibniz Equality is the principle that two things `\x \y : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type (lhs and rhs stand for “left-hand side” and “right-hand” side respectively):  
+Leibniz Equality is the principle that two things `\x \y : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type:  
 ```
-Eq[\T : ﹡, \lhs \rhs : T] := ∀\P : (T -> ﹡), P[lhs] -> P[rhs]
+Eq[\T : ﹡, \x \y : T] := ∀\P :⁰ T -> ﹡, P[x] -> P[y]
 ```
 
 We can easily provide a term stating every `x` is equal to itself:
 ```
-refl(0 \T : ﹡, \x : T) := (0 P : T -> ﹡, e : P[x]) ↦ e
+refl(\T :⁰ ﹡, \x : T) := (\P :⁰ T -> ﹡, \e : P[x]) ↦ e
 ```
 This property of equality is called reflexivity. Symmetry and transitivity for `Eq` can be also easily proved.
 
@@ -182,21 +182,33 @@ For structured objects (amongst other things, geometric structures such as graph
 
 The type of identifications `p : Id[T][G, H]` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl(T, x) : Id[T][x, x]` and the “induction principle” known as the J-rule:
 ```
-J(0 \T : ﹡, \x \y : T, p : Id[T][x, y]) :=
-  ∀\P : (\a \b : T -> Id[T][a, b] -> ﹡),
-  ((\t : T) -> P[t, t, refl(T, t)]) -> P[x, y, p]
+J(\T :⁰ ﹡, \x \y : T, p : Id[T][x, y]) :
+  ∀\P :⁰ (∀\a \b : T, Id[T][a, b]) -> ﹡), P[x, x, refl(T, x)] -> P[x, y, p]
 ```
 
 Now let's try to apply the approach we already employed for W-types to construct the `Id`-type from `Eq` in Core Cedille:
 ```
 Id[\T : ﹡, \x \y : T] := (
   \p : Eq[T][x, y],
-  p : ∀\P : (\a \b : T -> Eq[T][a, b] -> ﹡),
-    ((\t : T) -> P[t, t, refl(T, t)]) -> P[x, y, p]
+  p : ∀\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, P[x, x, refl(T, x)] -> P[x, y, p]
 )
 ```
 
-{Here comes a coding experiment to define this type in Cedille and ensuring it satisfies induction principle for itself.}
+To provide a constructor `(refl(T, t), refl'(T, t)) : Id[T, t, t]` of this type, we have to provide `refl'` which erases to `\x ↦ x` and has the type
+```
+∀\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, P[t, t, refl(T, t)] -> P[t, t, refl(T, t)]
+```
+It is not hard to write down such a term:
+```
+refl'(\T :⁰ ﹡, \x : T) := (\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, \e : P[t, t, refl(T, t)]) ↦ e
+```
+
+Now we only need to write down the `J`:
+```
+
+```
+
+{Ensure, it satisfies beta rule}
 
 {Show we can encode `Monoid[T]`, `Category[Ob]` and `Functor[Ob1, c1 : Cat[Ob2], c2 : Cat[Ob2]]` now}
 
