@@ -45,7 +45,7 @@ We'll work in a system where terms don't in general have a canonical type, but c
 ```
 In words: “(`f` is) for each natural number `n`, a list of integers of length `n`”. Such types are called dependent function types. The notation `X -> Y` is a shorthand for `∀\x : X, Y` for the case `Y` does not depend on `x`.
 
-The use of universal quantifier `∀` is justified by the fact that our type system is expressive enough to encode propositions (like “`n` is even” or “`n` is greater than `m`”) as types (`IsEven[\n : Nat]`, `IsGreater[\n \m : Nat]`) inhabited by proofs of these propositions, and a proof that a predicate `P[\x : X]` holds for each `x : X` is precisely a term of the type `∀\x : X, P[x]`. It is also true that for two propositions `A` and `B`, an constructive proof that `A` implies `B` is a term of the type `A -> B` (such term is the thing that yields a proof of `B` whenever we have a proof of `A`).
+The use of universal quantifier `∀` is justified by the fact that the type system is expressive enough to encode propositions (like “`n` is even” or “`n` is greater than `m`”) as types (`IsEven[\n : Nat]`, `IsGreater[\n \m : Nat]`) inhabited by proofs of these propositions, and a proof that a predicate `P[\x : X]` holds for each `x : X` is precisely a term of the type `∀\x : X, P[x]`. It is also true that for two propositions `A` and `B`, an constructive proof that `A` implies `B` is a term of the type `A -> B` (such term is the thing that yields a proof of `B` whenever we have a proof of `A`).
 
 Parameters (written `x :⁰ T`) can be seen as arguments which are not allowed to be used in the body of function (they in particular, they cannot be inspected and cannot be returned by the function), but can be used in type annotations. Parameters are allowed to be of any type, not neccessarily a datatype, so they can be used to define generic functions:
 ```
@@ -144,9 +144,9 @@ The crucial feature of Core Cedille is the dependent intersection type (first in
 ```
 Nat := (\n : Natᶜ, n : Natᴵ(n))
 ```
-Inhabitants of this type are Church numerals (“simple iterators”) `n` that simultaneously typecheck as “dependent iterators” for themselves. Since the definition of the type `Natᴵ(\n : Natᶜ)` contains this small `ᶜ` above for its arguments, there might be a problem. But fortunatelly, it turns out in Cedille, that these `ᶜ`s can be lifted: each `n : Nat` typechecks as its own dependent eliminator:
+Inhabitants of this type are Church numerals (“simple iterators”) `n` that simultaneously typecheck as “dependent iterators” for themselves. Since the definition of the type `Natᴵ(\n : Natᶜ)` contains this small `ᶜ` above for its arguments, there might be a problem. But fortunatelly, it turns out in Cedille we can define a conversion operator “ind” to lift these `ᶜ`s: each `n : Nat` typechecks as its own dependent eliminator:
 ```
-n : ∀\T : (Natᶜ -> ﹡), (step: ∀\m : Natᶜ, T[m] -> T[succ m]) -> (base : T[zero]) -> T[n]
+ind(n) : ∀\T : (Natᶜ -> ﹡), (step: ∀\m : Natᶜ, T[m] -> T[succ m]) -> (base : T[zero]) -> T[n]
 ```
 
 Thus, `Nat` turns out to be the completely faithful representation of the W-type of natural numbers: it satisfies `Nat-`induction in the strong computational sense. Note that the type `Natᶜ` is not yet that good: It is well known that in Calculus of Constructions (essentially, Core Cedille without dependent intersection types) one cannot derive the induction principle for the type `Natᶜ`, moreover there are reasonable models of Calculus of Constructions where the type `Natᶜ` contains a kind of fixpoint operators on some `T -> T` functions in addition to Church encodings of natural numbers. The dependent intersection rules out these “non-standard” (or rather “not-in-general-computable”) iterators.
@@ -161,7 +161,7 @@ Similar construction can be carried out for any W-type[3] yielding an impredicat
 > ¬P[\n : Nat] = P[n] -> ⊥
 > (where ⊥ is the empty type)
 > ```
-> and we also have the universal quantifier `∀\n : Nat, P[n]` and a constructive version of existential quantifier `𝚺\n : Nat, P[n]`. It means, we can construct the whole arithmetic hierarchy of predicates on natural numbers. The same obviously applies to all enumerable datatypes (i.e. datatypes which can be bijectively mapped to natural numbers, such as `List[Nat]`, `BinTree[Nat] × List[VarTree[Nat]]`). There are datatypes which cannot be shown enumerable, for example `Nat -> Nat` (types of the kind `A -> B` where both `A` and `B` are infinite enumerable types are called Baire types) or `Nat -> Bool` (types of the kind `A -> B` where both `A` is an infinite enumerable type and `B` a finite type with at least two distinct inhabitants are called Cantor types). Later we will also see that we can define the type of real numbers which also cannot be shown to be enumerable. All such examples are naturally effective Polish spaces, a kind of spaces for which arithmetic hierarchy of predicates can be defined as well (also called “lightface Borel hierarchy”), and those predicates are indeed definable in our system. 
+> and we also have the universal quantifier `∀\n : Nat, P[n]` and a constructive version of existential quantifier `𝚺\n : Nat, P[n]`. It means, we can construct the whole arithmetic hierarchy of predicates on natural numbers. The same obviously applies to all enumerable datatypes (i.e. datatypes which can be bijectively mapped to natural numbers, such as `List[Nat]`, `BinTree[Nat] × List[VarTree[Nat]]`). There are datatypes which cannot be shown enumerable, for example `Nat -> Nat` (types of the kind `A -> B` where both `A` and `B` are infinite enumerable types are called Baire types) or `Nat -> Bool` (types of the kind `A -> B` where both `A` is an infinite enumerable type and `B` a finite type with at least two distinct inhabitants are called Cantor types). Later we will also see that we can define the type of real numbers which also cannot be shown to be enumerable. All such examples are naturally effective Polish spaces, a kind of spaces for which arithmetic hierarchy of predicates can be defined as well (also called “lightface Borel hierarchy”), and those predicates are indeed definable in the system. 
 
 
 § Leibniz Equality and Id-types
@@ -203,6 +203,7 @@ It is not hard to write down such a term:
 refl'(\T :⁰ ﹡, \x : T) := (\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, \e : P[t, t, refl(T, t)]) ↦ e
 ```
 
+Exactly as in the case of “true” induction operator 
 Now we only need to write down the `J`:
 ```
 
@@ -219,34 +220,30 @@ Now we only need to write down the `J`:
 
 Using type formers that were already mentioned and type formers for ordinary datatypes, we can define datatypes like “Group structure on type `T`”, “Category structure on type `Ob`”, “Endofunctor parametrized type `T : ﹡ -> ﹡`”, “Functor structure on types `A` and `B`, each supplied by a category structure” or even “Spectrum structure on a sequence of types `Nat -> ﹡`”. But there is no datatype for a group, category, etc., itself: we cannot put these objects inside other objects, there is no `List[Cat]` of categories (while `List[Cat[Ob]]` of categories on a given carrier type is completely OK), there is no category of all groups `Cat[Grp]`, etc. What we need is a notion of a universe `U`, so that for parametrized datatypes can be relativized `U`, so that we have datatypes of `U`-small categories (that we can put into a list) and a category of `U`-small groups, and we need a reflection principle that allows to dismiss smallness, if it was not explicitly used.
 
-Postulate we have a universe `U` of datatype codes, together with type former `Dec(\code : U) : ﹡` (it's not a normal type former because it's not parametric in `code`). If a type former (like `Cat[Ob : ﹡]` factorizes via `U` and `Dec`), than we can produce a datatype `Cat^U : ﹡`, so that functions of the
-type `∀(\Ob :⁰ ﹡, c : Cat[Ob]), Y` can be applied to `c : Cat^U`.
 
-Problem: Not all definable datatypes `T : ﹡` live in the universe `U`, but only W-types and dependent products of those. Intersection types, in particular data types of the form `∀\x :⁰ X, Y` don't in general belong there, because they're not closed.
+We postulate a universe `U` of datatype closed under forming polynomials (i.e. it contains 0, 1, sums and products of any types), but it is not allowed to contain code for itself, together with operator `_↑` that turns _closed_ elements `u : U` into datatypes `u↑ : ﹡`. Datatypes obtainable in this way are called `U`-small. Now, for any type `T` formed by solely from `﹡` and `U`-small types, we have an operator `_↑ᵀ` that turns _closed_ lambda terms `f : (T') -> U` (where `T'` is the type `T` with all `﹡`s replaces by `U`s) into type formers
+```
+f↑ : (T) -> ﹡
+```
+Note that while the type former `f↑` is parametric in its arguments, the underlying the function `f` may inspect `X` (in particular perform case analysis) on its argument to calculate a type code (“large elimination”), but the requirement of `U`-smallness of `X` prevents arguments from storing an extractable type themselves. (Large elimination leads to inconsistency precisely when pieces of data we inspect are allowed to “store” types.)
 
-Yet we can fake it by changing `∀\x :⁰ X, Y` to `∀\x : X^U, Y`, where `_^U` is the following translation:
-* if `T` is a datatype, just `T`;
-* if `T` is `﹡`, than `U`;
-* if `T` is 
+{TODO: How to include type definitions as used in Arend? (i.e. no indexes/parameters, only arguments)}
 
+One can define the types `𝚺\Ob : U, Cat[Ob↑]`, `𝚺\Obs : Nat -> U, Spectrum[Obs↑]`, etc. These are types of `U`-small categories, `U`-small spectra, etc. Note that the types themselves are not `U`-small.
 
-for a type code `T` let `T↬U` the following:
-— if it is `﹡`, than `U`.
-– if it is `∀\x :⁰ X, Y`
-
-Assume we have types TypeCode and DatatypeCode. For every closed type/datatype definition as presented above we can find an element of TypeCode/DatatypeCode. Parametric type definitions are lambda terms 
-
----
-
-The reflection principle of ZMC/S applies to type constructors `𝜑` with U-small parameters. It defines the type constructor `𝜑ᵁ`, which is a version of `𝜑` where all quantifiers are constrained to run over `U`-small stuff. And it says that for each `p(params) : 𝜑(params)` we have a `p'(params) : 𝜑ᵁ(params)` and vice versa.
-
-You can consider a statement `𝜑 := ∃u : ﹡, Universe(U)`. It is true because `observe(U)`. Now `𝜑ᵁ := ∃u : U, IsUniverse(Dec(U))`, U has to contain a code for a smaller universe.
-
-Consider a statement `𝜑(x : U) := ∃u : ﹡, s : Universe(u), x : Dec`
-
+There is a way to extract types form type codes, but there is no way to construct a code for an unknown type. (i.e. `U`-small types are types, but there is no way to know if an unknown type is `U-small`). The reflection we need is a way to partially invert extracting types from codes: Namely if a function depends on a value of type `U`, but it's a blind dependence, it can be lifted as if it were dependent on a datatype:
+```
+f : ∀(\Ob :⁰ U, \c : Cat[Ob↑]), ...
+f↓ : ∀(\Ob :⁰ ﹡, \c : Cat[Ob]), ...
+```
+The transition other way around can be readily expressed without any further operators:
+```
+f := (\Ob :⁰ U, \c : Cat[Ob↑]) ↦ f↓[Ob↑](c)
 ```
 
-```
+These transitions establish equivalence for types (propositions) `𝜑` with unbounded quantifiers and `𝜑ᵁ` where all quantifiers are `U`-bounded.
+
+This reflection principle does not yet say, that any datatype has a `U`-small model, and actually `U` itself and types like `𝚺\Ob : U, Cat[Ob↑]` don't, so we have to introduce a hierarchy of universes `U'`, `U''`, etc. manually, where every next one is the previous one augmented by code for the previous one.
 
 
 <!---
