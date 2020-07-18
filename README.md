@@ -18,10 +18,11 @@ We'll write bare, untyped lambda terms like this (but we'll actually never write
 ```
 \x ↦ expr(x)
 ```
+Backslash preceeding variable name should be seen as freshness sigil: it belongs to the variable name and is used exactly once with each variable: at the point where its name appears the first time. Freshness sigils are mainly useful in languages with pattern matching, where patterns can contain both placeholders (labeled by fresh variable names) for reading values out and interpopations (labeled by names of constants or variables already in scope) for filling the values in.) For single-letter variables we'll be rendering backslashes as underline for better readability.
 
 There are data types, like `Int` standing for “integer number” or `Nat` standing for “natural number”, they are used to write down annotated lambda terms like this:
 ```
-(\x : Nat) ↦ expr(x)
+(x̲ : Nat) ↦ expr(x)
 ```
 
 The thing to the right of the colon has to be a datatype. Types are generally written in title-case (e.g. `Nat` for natural numbers, `Int` for integer numbers) and can have parameters (e.g. `List[Nat]` for list of natural numbers or `FList[Int, 5]` for list of integer numers of length 5). Not all types are datatypes: for example there is a type `﹡` of all datatypes. In type definitions, the thing to the right of the colon may by any type, non neccessarily a datatype. For example, the definition of `FList` begins as follows:
@@ -37,7 +38,6 @@ we'll sometimes use an equivalent shorter notation
 ```
 (\n \m : Nat, \q : Int) ↦ ...
 ```
-(NB: Backslash before variable name should be seen as freshness sigil: it belongs to the variable name and is used exactly once with each variable: at the point where its name appears the first time. Freshness sigils are mainly useful in languages with pattern matching, where patterns can contain both placeholders (labeled by fresh variable names) for reading values out and interpopations (labeled by names of constants or variables already in scope) for filling the values in.)
 
 We'll work in a system where terms don't in general have a canonical type, but can be typechecked against a given type, possibly nonunique. In particular, if for a term `f := (\x : X) ↦ expr(x)` the term `expr(x)` typechecks against type `Y` for every `x : X`, the term `f` typechecks against `X -> Y`. Such types are called function types. In general, the type `Y` can be dependent on the variable `x`: consider a function `f(n : Nat)`, generating some list of integers of length `n`, say first `n` Fibonacci numbers, than each `f(n)` whould typecheck against `FList[Int, n]`, in this case can write the type of `f` as
 ```
@@ -167,7 +167,7 @@ Similar construction can be carried out for any W-type[3] yielding an impredicat
 § Leibniz Equality and Id-types
 -------------------------------
 
-Leibniz Equality is the principle that two things `\x \y : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type:  
+Leibniz Equality is the principle that two things `x̲ y̲ : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type:  
 ```
 Eq[\T : ﹡, \x \y : T] := ∀\P :⁰ T -> ﹡, P[x] -> P[y]
 ```
