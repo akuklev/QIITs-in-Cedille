@@ -18,7 +18,7 @@ We'll write bare, untyped lambda terms like this (but we'll actually never write
 ```
 \x ↦ expr(x)
 ```
-Backslash preceeding variable name should be seen as freshness sigil: it belongs to the variable name and is used exactly once with each variable: at the point where its name appears the first time. Freshness sigils are mainly useful in languages with pattern matching, where patterns can contain both placeholders (labeled by fresh variable names) for reading values out and interpopations (labeled by names of constants or variables already in scope) for filling the values in.) For single-letter variables we'll be rendering backslashes as underline for better readability.
+Backslash preceeding variable name should be seen as freshness sigil: it belongs to the variable name and is used exactly once with each variable: at the point where its name appears the first time. Freshness sigils are mainly useful in languages with pattern matching, where patterns can contain both placeholders (labeled by fresh variable names) for reading values out and interpopations (labeled by names of constants or variables already in scope) for filling the values in.) For short variables we'll be rendering backslashes as underline for less clutter. Application of `f` to `x` is written `f(x)` or `f x`.
 
 There are data types, like `Int` standing for “integer number” or `Nat` standing for “natural number”, they are used to write down annotated lambda terms like this:
 ```
@@ -27,61 +27,61 @@ There are data types, like `Int` standing for “integer number” or `Nat` stan
 
 The thing to the right of the colon has to be a datatype. Types are generally written in title-case (e.g. `Nat` for natural numbers, `Int` for integer numbers) and can have parameters (e.g. `List[Nat]` for list of natural numbers or `FList[Int, 5]` for list of integer numers of length 5). Not all types are datatypes: for example there is a type `﹡` of all datatypes. In type definitions, the thing to the right of the colon may by any type, non neccessarily a datatype. For example, the definition of `FList` begins as follows:
 ```
-FList[\T : ﹡, length : Nat] := ...
+FList[T̲ : ﹡, length : Nat] := ...
 ```
 
 For nested lambda terms like
 ```
-(\n : Nat) ↦ (\m : Nat) ↦ (q : Int) ↦ ...
+(n̲ : Nat) ↦ (m̲ : Nat) ↦ (q̲ : Int) ↦ ...
 ```
 we'll sometimes use an equivalent shorter notation
 ```
-(\n \m : Nat, \q : Int) ↦ ...
+(n̲ m̲ : Nat, q̲ : Int) ↦ ...
 ```
 
-We'll work in a system where terms don't in general have a canonical type, but can be typechecked against a given type, possibly nonunique. In particular, if for a term `f := (\x : X) ↦ expr(x)` the term `expr(x)` typechecks against type `Y` for every `x : X`, the term `f` typechecks against `X -> Y`. Such types are called function types. In general, the type `Y` can be dependent on the variable `x`: consider a function `f(n : Nat)`, generating some list of integers of length `n`, say first `n` Fibonacci numbers, than each `f(n)` whould typecheck against `FList[Int, n]`, in this case can write the type of `f` as
+We'll work in a system where terms don't in general have a canonical type, but can be typechecked against a given type, possibly nonunique. In particular, if for a term `f := (x̲ : X) ↦ expr(x)` the term `expr(x)` typechecks against type `Y` for every `x : X`, the term `f` typechecks against `X -> Y`. Such types are called function types. In general, the type `Y` can be dependent on the variable `x`: consider a function `f(n : Nat)`, generating some list of integers of length `n`, say first `n` Fibonacci numbers, than each `f(n)` whould typecheck against `FList[Int, n]`, in this case can write the type of `f` as
 ```
-∀\n : Nat, FList[Int, n]
+∀n̲ : Nat, FList[Int, n]
 ```
-In words: “(`f` is) for each natural number `n`, a list of integers of length `n`”. Such types are called dependent function types. The notation `X -> Y` is a shorthand for `∀\x : X, Y` for the case `Y` does not depend on `x`.
+In words: “(`f` is) for each natural number `n`, a list of integers of length `n`”. Such types are called dependent function types. The notation `X -> Y` is a shorthand for `∀x̲ : X, Y` for the case `Y` does not depend on `x`.
 
-The use of universal quantifier `∀` is justified by the fact that the type system is expressive enough to encode propositions (like “`n` is even” or “`n` is greater than `m`”) as types (`IsEven[\n : Nat]`, `IsGreater[\n \m : Nat]`) inhabited by proofs of these propositions, and a proof that a predicate `P[\x : X]` holds for each `x : X` is precisely a term of the type `∀\x : X, P[x]`. It is also true that for two propositions `A` and `B`, an constructive proof that `A` implies `B` is a term of the type `A -> B` (such term is the thing that yields a proof of `B` whenever we have a proof of `A`).
+The use of universal quantifier `∀` is justified by the fact that the type system is expressive enough to encode propositions (like “`n` is even” or “`n` is greater than `m`”) as types (`IsEven[\n : Nat]`, `IsGreater[\n \m : Nat]`) inhabited by proofs of these propositions, and a proof that a predicate `P[x̲ : X]` holds for each `x : X` is precisely a term of the type `∀\x : X, P[x]`. It is also true that for two propositions `A` and `B`, an constructive proof that `A` implies `B` is a term of the type `A -> B` (such term is the thing that yields a proof of `B` whenever we have a proof of `A`).
 
 Parameters (written `x :⁰ T`) can be seen as arguments which are not allowed to be used in the body of function (they in particular, they cannot be inspected and cannot be returned by the function), but can be used in type annotations. Parameters are allowed to be of any type, not neccessarily a datatype, so they can be used to define generic functions:
 ```
-id := (\X :⁰ ﹡) ↦ (\x : X) ↦ x
+id := (X̲ :⁰ ﹡) ↦ (x̲ : X) ↦ x
 -- trivial function that simply returns what it gets as argument
 
-map := (\T :⁰ ﹡, \f : T -> T, \list : List[T]) ↦ ...
+map := (T̲ :⁰ ﹡, f̲ : T -> T, \list : List[T]) ↦ ...
 -- applies `f` to each element of the `list`
 ```
 Types of such functions are denoted as follows:
 ```
-id : ∀\X :⁰ ﹡, X -> X
+id : ∀X̲ :⁰ ﹡, X -> X
 
-map : ∀\T :⁰ ﹡, ∀\f : T -> T, List[T] -> List[T]
+map : ∀T̲ :⁰ ﹡, ∀f̲ : T -> T, List[T] -> List[T]
 ```
 
 Using a parameter of type `Nat` (which is an ordinary datatype), we can write down the type of functions on lists that preserve list length:
 ```
-∀\n :⁰ Nat, FList[X, n] -> FList[Y, n]
+∀n̲ :⁰ Nat, FList[X, n] -> FList[Y, n]
 ```
 
 Owing to Propositions-as-Types, parameters can be also used to put conditions on function arguments:
 ```
-(\n \m : Nat, \p :⁰ IsGreater[n, m]) ↦
+(n̲ m̲ : Nat, p̲ :⁰ IsGreater[n, m]) ↦
 ```
 
-Zero superscript means, the variable is allowed to be used in the body exactly zero times. The notation is inspired by Quantitative Type Theories: Besides arguments that can be used multiple times and parameters that are not allowed to be used in function body, most Quantitative Type Theories also support resources `(\x :¹ MutuallyExclusiveResource)`, variables that have to be used exactly once.
+Zero superscript means, the variable is allowed to be used in the body exactly zero times. The notation is inspired by Quantitative Type Theories: Besides arguments that can be used multiple times and parameters that are not allowed to be used in function body, most Quantitative Type Theories also support resources `(x̲ :¹ MutuallyExclusiveResource)`, variables that have to be used exactly once. Application of a term to a parameter is written `f[p]`, in expressions `f[p](x)`/`f[p] x`, `[p]` can be omited if unambigously derivable from the type of `x`.
 
-Annotated lambda terms can be stripped of their annotations and parameters to bare terms, this procedure is known as erasure. If two lambda terms `f` and `g` are identical as bare terms (i.e. with type annotations stripped), we'll write `f ⩦ g`. To give an example, `(\x : Nat) ↦ x ⩦ (\x : AnyOtherType) ↦ x ⩦ (\X :⁰ ﹡) ↦ (\x : X) ↦ x`, the term we already introduced as `id`. The type `∀\x :⁰ X, Y[x]` can be seen as an (in general infinitary) intersection type on the level of bare terms: it is the type of terms which simultaneously typecheck against all `Y[x]` for every `x : X` if annotated accordingly. In particular the type `∀\x :⁰ X, Y` with `Y` a datatype independent of `X`, is equivalent to `Y` itself. The type `∀\x : X, Y[x]` is quite a different beast: on the bare level it is never a term that typechecks as `Y[x]`, it has one lambda-abstraction more on the outside to accomodate additional argument `x`.
+Annotated lambda terms can be stripped of their annotations and parameters to bare terms, this procedure is known as erasure. If two lambda terms `f` and `g` are identical as bare terms (i.e. with type annotations stripped), we'll write `f ⩦ g`. To give an example, `(x̲ : Nat) ↦ x ⩦ (x̲ : AnyOtherType) ↦ x ⩦ (X̲ :⁰ ﹡) ↦ (x̲ : X) ↦ x`, the term we already introduced as `id`. The type `∀x̲ :⁰ X, Y[x]` can be seen as an (in general infinitary) intersection type on the level of bare terms: it is the type of terms which simultaneously typecheck against all `Y[x]` for every `x : X` if annotated accordingly. In particular the type `∀x̲ :⁰ X, Y` with `Y` a datatype independent of `X`, is equivalent to `Y` itself. The type `∀x̲ : X, Y[x]` is quite a different beast: on the bare level it is never a term that typechecks as `Y[x]`, it has one lambda-abstraction more on the outside to accomodate additional argument `x`.
 
 Now let's clarify which types are datatypes:
-* `∀\x : X, Y` requires both `X` and `Y` to be datatypes and defines a datatype;
-* `∀\x :⁰ X, Y` does not require `X` or `Y` to be datatypes and defines a datatype iff `Y` is;
+* `∀x̲ : X, Y` requires both `X` and `Y` to be datatypes and defines a datatype;
+* `∀x̲ :⁰ X, Y` does not require `X` or `Y` to be datatypes and defines a datatype iff `Y` is;
 * `﹡` is a type, but never a datatype.
 
-Since it is not allowed to write `X -> Y` if `Y` is not a datatype, we'll use `X -> Y` for `∀\x :⁰ X, Y` in such cases. It causes no problems, since it makes no sense write `∀\x :⁰ X, Y` for datatypes `Y` independent of `x` (such type is simply equivalent to `Y`) as mentioned earlier. That being said, let's give a few examples: `Nat -> ﹡` (sequence of types), `﹡ -> ﹡` (type parametrized by type) or even `(Nat -> ﹡) -> ﹡ -> ﹡` (type parametrized by a type and a sequence of types) are all valid types, but none of them is a datatype.
+Since it is not allowed to write `X -> Y` if `Y` is not a datatype, we'll use `X -> Y` for `∀x̲ :⁰ X, Y` in such cases. It causes no problems, since it makes no sense write `∀x̲ :⁰ X, Y` for datatypes `Y` independent of `x` (such type is simply equivalent to `Y`) as mentioned earlier. That being said, let's give a few examples: `Nat -> ﹡` (sequence of types), `﹡ -> ﹡` (type parametrized by type) or even `(Nat -> ﹡) -> ﹡ -> ﹡` (type parametrized by a type and a sequence of types) are all valid types, but none of them is a datatype.
 
 Now it's time to talk how to define datatypes and predicates on them.
 
@@ -91,10 +91,10 @@ Now it's time to talk how to define datatypes and predicates on them.
 
 Church numerals are terms of the following form:
 ```
-zero := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ base
-once := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ step(base)
-twice := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ step(step(base))
-thrice := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ step(step(step(base)))
+zero := (T̲ :⁰ ﹡, \step : T -> T, \base : T) ↦ base
+once := (T̲ :⁰ ﹡, \step : T -> T, \base : T) ↦ step(base)
+twice := (T̲ :⁰ ﹡, \step : T -> T, \base : T) ↦ step(step(base))
+thrice := (T̲ :⁰ ﹡, \step : T -> T, \base : T) ↦ step(step(step(base)))
 ```
 
 If a number `n` is given in form of a Church numeral, any function can be iterated `n` times simply by applying `n` to that function:
@@ -104,28 +104,28 @@ If a number `n` is given in form of a Church numeral, any function can be iterat
 
 Church numerals could be called “function iterators”. We can easily write down the type of Church numerals
 ```
-Natᶜ := ∀\T :⁰ ﹡, (T -> T) -> T -> T
+Natᶜ := ∀T̲ :⁰ ﹡, (T -> T) -> T -> T
 ```
 and the successor function
 ```
-succ(\n : Natᶜ) := (\T :⁰ ﹡, \step : T -> T, \base : T) ↦ (n[T] step)(step(base))
+succ(\n : Natᶜ) := (T̲ :⁰ ﹡, \step : T -> T, \base : T) ↦ (n[T] step)(step(base))
 ```
 
-Church numerals can only iterate functions returning values of the same type as their arguments, i.e. functions `f` of the type `∀\T :⁰ ﹡, (T -> T)`. Can we possibly iterate a function of a more general type? Yes, theoretically type `T` could be indexed over some type `I`, and its index could change every time we apply the function `f`. Let's call the index updating function `g` and write down signatures of `f` and `f'`:
+Church numerals can only iterate functions returning values of the same type as their arguments, i.e. functions `f` of the type `∀T̲ :⁰ ﹡, (T -> T)`. Can we possibly iterate a function of a more general type? Yes, theoretically type `T` could be indexed over some type `I`, and its index could change every time we apply the function `f`. Let's call the index updating function `g` and write down signatures of `f` and `f'`:
 ```
 g : I -> I
 T : I -> ﹡
-f : ∀\i :⁰ I, T[i] -> T[g i]
+f : ∀i̲ :⁰ I, T[i] -> T[g i]
 ```
 
 It would be desirable if we could iterate such functions as well: for each Church numeral (“iterator”) `n` we want to have a “dependent iterator” `n'` acting on such `f`s in so that
 ```
-(n' f) : ∀\i :⁰ I, T[i] -> T[(n g) i]
+(n' f) : ∀i̲ :⁰ I, T[i] -> T[(n g) i]
 ```
 
 Unfortunately, it cannot work exactly this way, because there is no `g` on the left side here (it is not encoded into `f` and there is no way for universal generalized iterator `n'` to guess it), so we have to fine-tune the setup. For the purpose of iterating `f` we're not interested in all values of index `i : I`, but only values obtained by iterated application of `g` to the base value (the index `i : I` of the type `T[i]` where the argument `x : T[i]` of `f(x)` and `(n' f)(x)` lives), so we can retype `f`: let `T'[zero] := T[i]` be the type where the argument lives and `T'[n] := (n g) i`, then
 ```
-f' : ∀\n :⁰ Nat, T[n] -> T[succ n]
+f' : ∀n̲ :⁰ Nat, T[n] -> T[succ n]
 ```
 And now we can write
 ```
@@ -135,33 +135,33 @@ Now how does the type of dependent iterator `n' : Natᴵ(n)` (it obviously depen
 
 Under propositions-as-types interpretation of types `Natᴵ(n)` is precisely the statement we can perform mathematical induction (Nat-induction) up to `n`: given a predicate `T :⁰ Nat -> ﹡`, an induction step `step : T[n] -> T[succ n]` and the base case `base : T[zero]`, we obtain `T[n]` for arbitrary `n : Nat`:
 ```
-Natᴵ[\n : Natᶜ] := ∀\T :⁰ Natᶜ -> ﹡, ∀\step : (∀\m : Natᶜ, T[m] -> T[succ m]), ∀\base : T[zero], T[n]
+Natᴵ[n̲ : Natᶜ] := ∀\T :⁰ Natᶜ -> ﹡, ∀\step : (∀m̲ : Natᶜ, T[m] -> T[succ m]), ∀\base : T[zero], T[n]
 ```
 
 It turns out, we can actually easily provide typed lambda terms `zero' : Natᴵ[zero]`, `once' : Natᴵ[once]`, etc. Moreover they coincide with respective Church numerals as bare terms: `n ⩦ n'`.
 
 The crucial feature of Core Cedille is the dependent intersection type (first introduced by A. Kopylov) that allows to define the type
 ```
-Nat := (\n : Natᶜ, n : Natᴵ(n))
+Nat := (n̲ : Natᶜ, n : Natᴵ(n))
 ```
 Inhabitants of this type are Church numerals (“simple iterators”) `n` that simultaneously typecheck as “dependent iterators” for themselves. Since the definition of the type `Natᴵ(\n : Natᶜ)` contains this small `ᶜ` above for its arguments, there might be a problem. But fortunatelly, it turns out in Cedille we can define a conversion operator “ind” to lift these `ᶜ`s: each `n : Nat` typechecks as its own dependent eliminator:
 ```
-ind(n) : ∀\T : (Natᶜ -> ﹡), (step: ∀\m : Natᶜ, T[m] -> T[succ m]) -> (base : T[zero]) -> T[n]
+ind(n) : ∀T̲ : (Natᶜ -> ﹡), (step: ∀m̲ : Natᶜ, T[m] -> T[succ m]) -> (base : T[zero]) -> T[n]
 ```
 
 Thus, `Nat` turns out to be the completely faithful representation of the W-type of natural numbers: it satisfies `Nat-`induction in the strong computational sense. Note that the type `Natᶜ` is not yet that good: It is well known that in Calculus of Constructions (essentially, Core Cedille without dependent intersection types) one cannot derive the induction principle for the type `Natᶜ`, moreover there are reasonable models of Calculus of Constructions where the type `Natᶜ` contains a kind of fixpoint operators on some `T -> T` functions in addition to Church encodings of natural numbers. The dependent intersection rules out these “non-standard” (or rather “not-in-general-computable”) iterators.
 
-Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle. Thus, in addition to natural numbers we also have lists, trees of various shapes, finite types of any size `n : Nat` including empty and unit types, disjoint sums `A + B` and tuples `A × B` for any datatypes `A` and `B` as well as dependent tuples `𝚺\x : X, Y[X]`, that can be used to write functions that ensure postconditions (if you function delivers an even natural number, you can write that it returns `𝚺\n : Nat, IsEven[n]`. The actual result can be extracted as the first component of the tuple and the witness that it is indeed even as the second one).
+Similar construction can be carried out for any W-type[3] yielding an impredicative encoding with correct dependent elimination principle. Thus, in addition to natural numbers we also have lists, trees of various shapes, finite types of any size `n : Nat` including empty and unit types, disjoint sums `A + B` and tuples `A × B` for any datatypes `A` and `B` as well as dependent tuples `𝚺x̲ : X, Y[x]`, that can be used to write functions that ensure postconditions (if you function delivers an even natural number, you can write that it returns `𝚺n̲ : Nat, IsEven[n]`. The actual result can be extracted as the first component of the tuple and the witness that it is indeed even as the second one).
 
-> Note that the system is expressive enough to encode a vast range of predicates. For finite types `F`, we can obviously provide characteristic predicates `P[\x : F]` for any of their subsets. It is well known (we'll show that in Appendix I) that the characteristic predicate `P[\n : Nat]` for any recursively enumerable (= algebraic) subset of natural numbers can be given as a W-type. We also can encode logical connectives on predicates `P[\n : Nat]` and `S[\n : Nat]` as follows:
+> Note that the system is expressive enough to encode a vast range of predicates. For finite types `F`, we can obviously provide characteristic predicates `P[x̲ : F]` for any of their subsets. It is well known (we'll show that in Appendix I) that the characteristic predicate `P[n̲ : Nat]` for any recursively enumerable (= algebraic) subset of natural numbers can be given as a W-type. We also can encode logical connectives on predicates `P[n̲ : Nat]` and `S[n̲ : Nat]` as follows:
 > ```
-> P∧S[\n : Nat] = P[n] × S[N]
-> P∨S[\n : Nat] = P[n] + S[N]
-> P→S[\n : Nat] = P[n] -> S[N]
-> ¬P[\n : Nat] = P[n] -> ⊥
+> P∧S[n̲ : Nat] = P[n] × S[N]
+> P∨S[n̲ : Nat] = P[n] + S[N]
+> P→S[n̲ : Nat] = P[n] -> S[N]
+> ¬P[n̲ : Nat] = P[n] -> ⊥
 > (where ⊥ is the empty type)
 > ```
-> and we also have the universal quantifier `∀\n : Nat, P[n]` and a constructive version of existential quantifier `𝚺\n : Nat, P[n]`. It means, we can construct the whole arithmetic hierarchy of predicates on natural numbers. The same obviously applies to all enumerable datatypes (i.e. datatypes which can be bijectively mapped to natural numbers, such as `List[Nat]`, `BinTree[Nat] × List[VarTree[Nat]]`). There are datatypes which cannot be shown enumerable, for example `Nat -> Nat` (types of the kind `A -> B` where both `A` and `B` are infinite enumerable types are called Baire types) or `Nat -> Bool` (types of the kind `A -> B` where both `A` is an infinite enumerable type and `B` a finite type with at least two distinct inhabitants are called Cantor types). Later we will also see that we can define the type of real numbers which also cannot be shown to be enumerable. All such examples are naturally effective Polish spaces, a kind of spaces for which arithmetic hierarchy of predicates can be defined as well (also called “lightface Borel hierarchy”), and those predicates are indeed definable in the system. 
+> and we also have the universal quantifier `∀n̲ : Nat, P[n]` and a constructive version of existential quantifier `𝚺n̲ : Nat, P[n]`. It means, we can construct the whole arithmetic hierarchy of predicates on natural numbers. The same obviously applies to all enumerable datatypes (i.e. datatypes which can be bijectively mapped to natural numbers, such as `List[Nat]`, `BinTree[Nat] × List[VarTree[Nat]]`). There are datatypes which cannot be shown enumerable, for example `Nat -> Nat` (types of the kind `A -> B` where both `A` and `B` are infinite enumerable types are called Baire types) or `Nat -> Bool` (types of the kind `A -> B` where both `A` is an infinite enumerable type and `B` a finite type with at least two distinct inhabitants are called Cantor types). Later we will also see that we can define the type of real numbers which also cannot be shown to be enumerable. All such examples are naturally effective Polish spaces, a kind of spaces for which arithmetic hierarchy of predicates can be defined as well (also called “lightface Borel hierarchy”), and those predicates are indeed definable in the system. 
 
 
 § Leibniz Equality and Id-types
@@ -169,38 +169,38 @@ Similar construction can be carried out for any W-type[3] yielding an impredicat
 
 Leibniz Equality is the principle that two things `x̲ y̲ : T` are called equal iff for any predicate `P : T -> ﹡` the proposition `P[x]` implies `P[y]`, if any statement about `x` is true, than so is the same statement about `y`. Leibniz equality principle defines equal as indiscernible. Under propositions-as-types interpretation, this principle can be reified as the following type:  
 ```
-Eq[\T : ﹡, \x \y : T] := ∀\P :⁰ T -> ﹡, P[x] -> P[y]
+Eq[T̲ :⁰ ﹡][x̲ y̲ : T] := ∀P̲ :⁰ T -> ﹡, P[x] -> P[y]
 ```
 
 We can easily provide a term stating every `x` is equal to itself:
 ```
-refl(\T :⁰ ﹡, \x : T) := (\P :⁰ T -> ﹡, \e : P[x]) ↦ e
+refl(T̲ :⁰ ﹡, x̲ : T) := (P̲ :⁰ T -> ﹡, x̲ : P[x]) ↦ e
 ```
 This property of equality is called reflexivity. Symmetry and transitivity for `Eq` can be also easily proved.
 
 For structured objects (amongst other things, geometric structures such as graphs, and algebraic structures, such as groups, rings, etc.) it makes sense to talk about identifiablity instead of equality. An identification `p : Id[T][G, H]` between two objects `G` and `H` of type `T` (called isomorphism in case of algebraic structures) is a rule allowing to “transport” any construction `f(\x : G)` on `G` and any true statement `P[G]` about `G` into a construction on `H`/true statement `P[H]` about `H` and vice versa. By transporting true statements both ways, the notion of identifiability subsumes the notion of indiscernibility (“Leibniz equality”), but it extends it by acknowledging that there can be more than one way to identify things, and the choice of identification is substantial. (The recent insight, that identifications themselves are structured mathematical objects in their own right, and it makes a lot of sense to think about identifications between identifications, lead to a novel research area called Homotopy Type Theory.)
 
-The type of identifications `p : Id[T][G, H]` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl(T, x) : Id[T][x, x]` and the “induction principle” known as the J-rule:
+The type of identifications `p : Id[T][G, H]` can be defined in Intuitionistic Type Theories as an indexed inductive type, but it is not a W-type. Its defining features are the only constructor `refl[T](x) : Id[T][x, x]` and the “induction principle” known as the J-rule:
 ```
-J(\T :⁰ ﹡, \x \y : T, p : Id[T][x, y]) :
-  ∀\P :⁰ (∀\a \b : T, Id[T][a, b]) -> ﹡), P[x, x, refl(T, x)] -> P[x, y, p]
+J(T̲ :⁰ ﹡, x̲ y̲ : T, p : Id[T][x, y]) :
+  ∀P̲ :⁰ (∀a̲ b̲ : T, Id[T][a, b]) -> ﹡), P[x, x, refl[T](x)] -> P[x, y, p]
 ```
 
 Now let's try to apply the approach we already employed for W-types to construct the `Id`-type from `Eq` in Core Cedille:
 ```
-Id[\T : ﹡, \x \y : T] := (
-  \p : Eq[T][x, y],
-  p : ∀\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, P[x, x, refl(T, x)] -> P[x, y, p]
+Id[T̲ : ﹡][x̲ y̲ : T] := (
+  p̲ : Eq[T][x, y],
+  p : ∀P̲ :⁰ (∀a̲ b̲ : T, Eq[T][a, b]) -> ﹡, P[x, x, refl[T](x)] -> P[x, y, p]
 )
 ```
 
-To provide a constructor `(refl(T, t), refl'(T, t)) : Id[T, t, t]` of this type, we have to provide `refl'` which erases to `\x ↦ x` and has the type
+To provide a constructor `(refl[T](t), refl'[T](t)) : Id[T, t, t]` of this type, we have to provide `refl'` which erases to `\x ↦ x` and has the type
 ```
-∀\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, P[t, t, refl(T, t)] -> P[t, t, refl(T, t)]
+∀P̲ :⁰ (∀a̲ b̲ : T, Eq[T][a, b]) -> ﹡, P[t, t, refl[T](t)] -> P[t, t, refl[T](t)]
 ```
 It is not hard to write down such a term:
 ```
-refl'(\T :⁰ ﹡, \x : T) := (\P :⁰ (∀\a \b : T, Eq[T][a, b]) -> ﹡, \e : P[t, t, refl(T, t)]) ↦ e
+refl'(T̲ :⁰ ﹡, x̲ : T) := (P̲ :⁰ (∀a̲ b̲ : T, Eq[T][a, b]) -> ﹡, e̲ : P[t, t, refl(T, t)]) ↦ e
 ```
 
 Exactly as in the case of “true” induction operator 
@@ -221,29 +221,29 @@ Now we only need to write down the `J`:
 Using type formers that were already mentioned and type formers for ordinary datatypes, we can define datatypes like “Group structure on type `T`”, “Category structure on type `Ob`”, “Endofunctor parametrized type `T : ﹡ -> ﹡`”, “Functor structure on types `A` and `B`, each supplied by a category structure” or even “Spectrum structure on a sequence of types `Nat -> ﹡`”. But there is no datatype for a group, category, etc., itself: we cannot put these objects inside other objects, there is no `List[Cat]` of categories (while `List[Cat[Ob]]` of categories on a given carrier type is completely OK), there is no category of all groups `Cat[Grp]`, etc. What we need is a notion of a universe `U`, so that for parametrized datatypes can be relativized `U`, so that we have datatypes of `U`-small categories (that we can put into a list) and a category of `U`-small groups, and we need a reflection principle that allows to dismiss smallness, if it was not explicitly used.
 
 
-We postulate a universe `U` of datatype closed under forming polynomials (i.e. it contains 0, 1, sums and products of any types), but it is not allowed to contain code for itself, together with operator `_↑` that turns _closed_ elements (also applies to bounded variables, but not to lambda-expressions referring outer variables) `u : U` into datatypes `u↑ : ﹡`. Datatypes obtainable in this way are called `U`-small. Now, for any type `T` formed by solely from `﹡` and `U`-small types, we have an operator `_↑ᵀ` that turns closed lambda terms `f : (T') -> U` (where `T'` is the type `T` with all `﹡`s replaces by `U`s) into type formers
+We postulate a universe `U` of datatype closed under forming polynomials (i.e. it contains 0, 1, sums and products of any types), but it is not allowed to contain code for itself, together with operator `[_]` that turns _closed_ elements (also applies to bounded variables, but not to lambda-expressions referring outer variables) `u : U` into datatypes `[u] : ﹡`. Datatypes obtainable in this way are called `U`-small. Now, for any type `T` formed by solely from `﹡` and `U`-small types, we have an operator `[_]ᵀ` that turns closed lambda terms `f : (T') -> U` (where `T'` is the type `T` with all `﹡`s replaces by `U`s) into type formers
 ```
-f↑ : (T) -> ﹡
+[f] : (T) -> ﹡
 ```
-Note that while the type former `f↑` is parametric in its arguments, the underlying the function `f` may inspect `X` (in particular perform case analysis) on its argument to calculate a type code (“large elimination”), but the requirement of `U`-smallness of `X` prevents arguments from storing an extractable type themselves. (Large elimination leads to inconsistency precisely when pieces of data we inspect are allowed to “store” types.)
+Note that while the type former `[f]` is parametric in its arguments, the underlying the function `f` may inspect `X` (in particular perform case analysis) on its argument to calculate a type code (“large elimination”), but the requirement of `U`-smallness of `X` prevents arguments from storing an extractable type themselves. (Large elimination leads to inconsistency precisely when pieces of data we inspect are allowed to “store” types.)
 
 {TODO: How to include type definitions as used in Arend? (i.e. no indexes/parameters, only arguments)}
 
-One can define the types `𝚺\Ob : U, Cat[Ob↑]`, `𝚺\Obs : Nat -> U, Spectrum[Obs↑]`, etc. These are types of `U`-small categories, `U`-small spectra, etc. Note that the types themselves are not `U`-small. 
+One can define the types `𝚺\Ob : U, Cat[Ob]`, `𝚺\Obs : Nat -> U, Spectrum[Obs]`, etc. These are types of `U`-small categories, `U`-small spectra, etc. Note that the types themselves are not `U`-small. 
 
 There is a way to extract types form type codes, but there is no way to construct a code for an unknown type. (i.e. `U`-small types are types, but there is no way to know if an unknown type is `U-small`). The reflection we need is a way to partially invert extracting types from codes: Namely if a function depends on a value of type `U`, but it's a blind dependence, it can be lifted as if it were dependent on a datatype:
 ```
-f : ∀(\Ob :⁰ U, \c : Cat[Ob↑]), ...
-f↓ : ∀(\Ob :⁰ ﹡, \c : Cat[Ob]), ...
+f : ∀(\Ob :⁰ U, \c : Cat[Ob]), ...
+f↑ : ∀(\Ob :⁰ ﹡, \c : Cat[Ob]), ...
 ```
 The transition other way around can be readily expressed without any further operators:
 ```
-f := (\Ob :⁰ U, \c : Cat[Ob↑]) ↦ f↓[Ob↑](c)
+f := (\Ob :⁰ U, \c : Cat[Ob]) ↦ f↑[Ob](c)
 ```
 
 These transitions establish equivalence for types (propositions) `𝜑` with unbounded quantifiers and `𝜑ᵁ` where all quantifiers are `U`-bounded.
 
-This reflection principle does not yet say, that any datatype has a `U`-small model, and actually `U` itself and types like `𝚺\Ob : U, Cat[Ob↑]` don't, so we have to introduce a hierarchy of universes `U'`, `U''`, etc. manually, where every next one is the previous one augmented by code for the previous one. This way we'll see that there is a code for `𝚺\Ob : U, Cat[Ob↑]` in `U'`, so it is a `U'`-small datatype. By means of lifting we can ensure that the type `𝚺\Ob : U', Cat[Ob↑]` (that additonnally includes the category of categories) is actually equivalent to the original `𝚺\Ob : U, Cat[Ob↑]`, so we can use “initiality instead of polymorphism”. What about universes containing smaller universes? Well that's the case if universes are also closed under quotient-inductive-inductive-recursive-types that make it possible to encode a universe with exactly the same closedness properties inside the universe.
+This reflection principle does not yet say, that any datatype has a `U`-small model, and actually `U` itself and types like `𝚺\Ob : U, Cat[Ob]` don't, so we have to introduce a hierarchy of universes `U'`, `U''`, etc. manually, where every next one is the previous one augmented by code for the previous one. This way we'll see that there is a code for `𝚺\Ob : U, Cat[Ob]` in `U'`, so it is a `U'`-small datatype. By means of lifting we can ensure that the type `𝚺\Ob : U', Cat[Ob]` (that additonnally includes the category of categories) is actually equivalent to the original `𝚺\Ob : U, Cat[Ob↑]`, so we can use “initiality instead of polymorphism”. What about universes containing smaller universes? Well that's the case if universes are also closed under quotient-inductive-inductive-recursive-types that make it possible to encode a universe with exactly the same closedness properties inside the universe.
 
 
 > # Digression: Incompletely Instantiated Types
